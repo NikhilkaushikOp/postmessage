@@ -3,7 +3,7 @@
     alert(JSON.stringify(event.data));
   }
 
-  var dest = window.open("https://id.twitch.tv/oauth2/authorize?client_id=d6g6o112aam5s8q2di888us9o3kuyh&force_verify=true&lang=en-gb&login_type=login&redirect_uri=https%3A%2F%2Fwww.twitch.tv%2Fpassport-callback&response_type=token&scope=user_read&state=%7B%22origin%22%3A%22full_page%22%2C%22next%22%3A%22https%3A%2F%2Fdev.twitch.tv%2Flogin%3Fnext%3Dhttps%253A%252F%252Fdev.twitch.tv%252F%22%2C%22nonce%22%3A%22b521fa84fe1d475c2694a347254f7ae5%22%7D");
+  var dest = window.open("https://id.twitch.tv/oauth2/authorize?claims=%7B%22id_token%22%3A%7B%22email%22%3Anull%2C%22email_verified%22%3Anull%2C%22picture%22%3Anull%2C%22preferred_username%22%3Anull%7D%7D&client_id=dvmilryenjma5r6dulhj76o0gxbvkyw&display&nonce=4b2d0bdacb1643d91b1716baf51b83ec82888de41ded87aaf18fce757122eea8a912175d67b1159bcc06b5126edcbda229973c3dafa6066e62f165e6099d41cc&redirect_uri=https%3A%2F%2Fwww.igdb.com%2Foauth%2Fcallback%3Fprovider%3Dtwitch&response_type=code&scope=openid+user_read+channel_feed_read&state=%7B%22nonce%22%3A%22yRqnVkK43deXQ8xcYphKM8dDv7Nv4sENj18Rdtt2d6c%22%2C%22next%22%3A%22igdb.com%22%7D");
   
   window.addEventListener("message", listener);
 </script>
