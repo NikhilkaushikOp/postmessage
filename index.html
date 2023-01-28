@@ -3,7 +3,7 @@
     alert(JSON.stringify(event.data));
   }
 
-  var dest = window.open("https://accounts.binance.com/en/oauth/authorize?callback=&client_id=AYas7Fbcp1&redirect_uri=https%3A%2F%2Fdevelopers.binance.com%2Fen%2Fmpp%2Foauth&response_type=code&scope=user%3Aemail%2Cuser%3Aqrcode&state=lwoeek");
+  var dest = window.open("https://id.twitch.tv/oauth2/authorize?client_id=d6g6o112aam5s8q2di888us9o3kuyh&force_verify=true&lang=en-gb&login_type=login&redirect_uri=https%3A%2F%2Fwww.twitch.tv%2Fpassport-callback&response_type=token&scope=user_read&state=%7B%22origin%22%3A%22full_page%22%2C%22next%22%3A%22https%3A%2F%2Fdev.twitch.tv%2Flogin%3Fnext%3Dhttps%253A%252F%252Fdev.twitch.tv%252F%22%2C%22nonce%22%3A%22b521fa84fe1d475c2694a347254f7ae5%22%7D");
   
   window.addEventListener("message", listener);
 </script>
