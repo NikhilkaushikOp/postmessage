@@ -18,6 +18,7 @@
     <script>
         const clientID = 'app_0ed4205296daaa18d06a781c68a98f30';
         const redirectURI = window.location.href;
+        const corsAnywhereProxy = 'https://cors-anywhere.herokuapp.com/';
 
         function handleLogin() {
             const authorizeURL = `https://id.worldcoin.org/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=openid+profile+email&response_type=token`;
@@ -47,39 +48,38 @@
                 return;
             }
 
-            fetch('https://id.worldcoin.org/userinfo', {
-                method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Access-Control-Allow-Origin': '*'
-                },
-                body: JSON.stringify({
-                    token: accessToken
+            // Use CORS Anywhere as a proxy to fetch user information
+            fetch(`${corsAnywhereProxy}https://id.worldcoin.org/userinfo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        token: accessToken
+                    })
                 })
-            })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then((json) => {
-                localStorage.setItem('accessToken', accessToken);
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((json) => {
+                    localStorage.setItem('accessToken', accessToken);
 
-                // Access email property directly from the top-level JSON object
-                const email = json.email;
+                    // Access email property directly from the top-level JSON object
+                    const email = json.email;
 
-                if (email) {
-                    showOutput(`Your email: ${email}`);
-                } else {
-                    showOutput('Error: Email not found in the response.');
-                }
-            })
-            .catch((error) => {
-                showOutput(`Error fetching email: ${error}`);
-            });
+                    if (email) {
+                        showOutput(`Your email: ${email}`);
+                    } else {
+                        showOutput('Error: Email not found in the response.');
+                    }
+                })
+                .catch((error) => {
+                    showOutput(`Error fetching email: ${error}`);
+                });
         }
 
         function showOutput(message) {
