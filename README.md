@@ -1,1 +1,1 @@
-aweme://authorize?authType=1&client_key=awf64lyu2xhhjojp&client_ticket=tobefilled&scope=video.list&token=nzGsf7d9I2w_NqV-eCv2gzWQQ9ELZ3HG8M7nOm06fm7tcXcbHoRp_82sbAprNoGu_useast5_sign0864932e2181f724
+[google](aweme://authorize?authType=1&client_key=awf64lyu2xhhjojp&client_ticket=tobefilled&scope=video.list&token=nzGsf7d9I2w_NqV-eCv2gzWQQ9ELZ3HG8M7nOm06fm7tcXcbHoRp_82sbAprNoGu_useast5_sign0864932e2181f724)
