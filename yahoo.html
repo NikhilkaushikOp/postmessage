@@ -16,7 +16,7 @@
     <script>
         const clientID = "dj0yJmk9YUFOV1V0YXBlbFVFJmQ9WVdrOU1XbzJWbkk1YkRZbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTY5";
         const clientSecret = "e4cbceb730d1b08d3c3ceddd89901acaa9e8920c";
-        const redirectURI = window.location.href; // No URL encoding here
+        const redirectURI = "https://nikhilkaushikop.github.io/postmessage/yahoo";
         
         const proxyURL = "https://cors-anywhere.herokuapp.com/";
         const authorizationURL = "https://api.login.yahoo.com/oauth2/request_auth";
@@ -24,7 +24,7 @@
         const userInfoURL = "https://api.login.yahoo.com/openid/v1/userinfo";
 
         function handleLogin() {
-            const authorizeURL = `${authorizationURL}?client_id=${clientID}&redirect_uri=https://nikhilkaushikop.github.io/postmessage/yahoo&response_type=code&scope=openid`;
+            const authorizeURL = `https://api.login.yahoo.com/oauth2/request_auth?client_id=dj0yJmk9YUFOV1V0YXBlbFVFJmQ9WVdrOU1XbzJWbkk1YkRZbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTY5&redirect_uri=https://nikhilkaushikop.github.io/postmessage/yahoo&response_type=code&scope=openid`;
             window.location.href = authorizeURL;
         }
 
