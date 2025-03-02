@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linode Sign-In</title>
+    <script>
+        function getAccessTokenFromUrl() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            return params.get('access_token');
+        }
+
+        function fetchLinodeAccount(accessToken) {
+            if (!accessToken) {
+                document.getElementById("response-output").textContent = "No access token found!";
+                return;
+            }
+
+            fetch("https://api.linode.com/v4/account", {
+                method: "GET",
+                headers: {
+                    "accept": "application/json",
+                    "authorization": "Bearer " + accessToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response-output").textContent = JSON.stringify(data, null, 4);
+            })
+            .catch(error => {
+                document.getElementById("response-output").textContent = "Error fetching data: " + error;
+            });
+        }
+
+        window.onload = function() {
+            const accessToken = getAccessTokenFromUrl();
+            if (!accessToken) {
+                window.location.href = "https://login.linode.com/oauth/authorize?client_id=5823b4627e45411d18e9&response_type=token&scopes=*&redirect_uri=http://localhost@nikhilkaushikop.github.io/postmessage/linode";
+            } else {
+                fetchLinodeAccount(accessToken);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Linode</h1>
+    <pre id="response-output"></pre>
+</body>
+</html>
