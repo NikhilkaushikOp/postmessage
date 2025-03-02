@@ -17,6 +17,8 @@
                 return;
             }
 
+            document.getElementById("access-token").textContent = "Access Token: " + accessToken;
+
             fetch("https://api.linode.com/v4/account", {
                 method: "GET",
                 headers: {
@@ -45,6 +47,7 @@
 </head>
 <body>
     <h1>Login with Linode</h1>
+    <p id="access-token"></p>
     <pre id="response-output"></pre>
 </body>
 </html>
