@@ -1,66 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zendesk Sign-In</title>
-    <script>
-        function getAccessTokenFromUrl() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            return params.get('access_token');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zendesk OAuth via AllOrigins</title>
+  <script>
+    function getAccessTokenFromUrl() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      return params.get("access_token");
+    }
+
+    function fetchZendeskContacts(accessToken) {
+      if (!accessToken) {
+        document.getElementById("response-output").textContent = "No access token found!";
+        return;
+      }
+
+      document.getElementById("access-token").textContent = accessToken;
+
+      const corsProxy = "https://api.allorigins.win/raw?url=";
+      const targetUrl = "https://api.getbase.com/v2/contacts";
+      const finalUrl = corsProxy + encodeURIComponent(targetUrl);
+
+      fetch(finalUrl, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer " + accessToken
         }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Request failed with status " + response.status);
+        return response.json();
+      })
+      .then(data => {
+        document.getElementById("response-output").textContent = JSON.stringify(data, null, 4);
+      })
+      .catch(error => {
+        document.getElementById("response-output").textContent = "Error fetching data: " + error;
+      });
+    }
 
-        function fetchZendeskContacts(accessToken) {
-            if (!accessToken) {
-                document.getElementById("response-output").textContent = "No access token found!";
-                return;
-            }
+    window.onload = function () {
+      const accessToken = getAccessTokenFromUrl();
 
-            document.getElementById("access-token").textContent = "Access Token: " + accessToken;
-
-            fetch("https://api.getbase.com/v2/contacts", {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json",
-                    "Authorization": "Bearer " + accessToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("response-output").textContent = JSON.stringify(data, null, 4);
-            })
-            .catch(error => {
-                document.getElementById("response-output").textContent = "Error fetching data: " + error;
-            });
-        }
-
-        window.onload = function () {
-            const accessToken = getAccessTokenFromUrl();
-
-            if (!accessToken) {
-                // Auto-submit the form to start the OAuth flow
-                document.getElementById("zendesk-auth-form").submit();
-            } else {
-                // Token exists, fetch data
-                fetchZendeskContacts(accessToken);
-            }
-        };
-    </script>
+      if (!accessToken) {
+        // Auto-submit the form to start the OAuth flow
+        document.getElementById("zendesk-auth-form").submit();
+      } else {
+        fetchZendeskContacts(accessToken);
+      }
+    };
+  </script>
 </head>
 <body>
-    <h1>Login with Zendesk</h1>
-    <p id="access-token"></p>
-    <pre id="response-output"></pre>
+  <h1>Login with Zendesk</h1>
+  <p><strong>Access Token:</strong> <span id="access-token"></span></p>
+  <pre id="response-output">Waiting for token or redirect...</pre>
 
-    <!-- Hidden form that will auto-submit on load -->
-    <form id="zendesk-auth-form" method="POST" action="https://api.getbase.com/oauth2/authorize" style="display:none;">
-        <input type="hidden" name="client_id" value="6f96c1eec729200f27f167b048379aa7b8dd13ea12b5b048612229f90696a4aa">
-        <input type="hidden" name="redirect_uri" value="https://nikhilkaushikop.github.io/postmessage/zendesk">
-        <input type="hidden" name="state" value="">
-        <input type="hidden" name="response_type" value="token">
-        <input type="hidden" name="scope" value="read write profile sync">
-        <input type="submit" value="Authorize">
-    </form>
+  <!-- Hidden form to trigger OAuth -->
+  <form id="zendesk-auth-form" method="POST" action="https://api.getbase.com/oauth2/authorize" style="display:none;">
+    <input type="hidden" name="client_id" value="6f96c1eec729200f27f167b048379aa7b8dd13ea12b5b048612229f90696a4aa">
+    <input type="hidden" name="redirect_uri" value="https://nikhilkaushikop.github.io/postmessage/zendesk">
+    <input type="hidden" name="state" value="">
+    <input type="hidden" name="response_type" value="token">
+    <input type="hidden" name="scope" value="read write profile sync">
+    <input type="submit" value="Authorize">
+  </form>
 </body>
 </html>
