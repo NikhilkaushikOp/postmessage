@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LemonSqueezy Sign-In</title>
+    <script>
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        function loginWithLemonSqueezy() {
+            // Redirect to LemonSqueezy OAuth authorization URL when the button is clicked
+            window.location.href = "https://app.lemonsqueezy.com/oauth/authorize?client_id=df166c96-0083-4e85-a01b-4ef5d0200b13&state=&redirect_uri=https%3A%2F%2Fzapier.com:80@nikhilkaushikop.github.io/postmessage/stripe&response_type=code&scope=";
+        }
+
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Display the authorization code if found in the URL
+                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with LemonSqueezy</h1>
+    <button onclick="loginWithLemonSqueezy()">Login with LemonSqueezy</button>
+    <p id="authorization-code"></p>
+</body>
+</html>
