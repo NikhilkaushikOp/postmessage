@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft  Sign-In</title>
+    <script>
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        function loginWithMicrosoft() {
+            // Redirect to Microsoft OAuth authorization URL when the button is clicked
+            window.location.href = "https://clarity.microsoft.com/zapier?state=&redirect_uri=https%3A%2F%2Fzapier.com:@nikhilkaushikop.github.io/postmessage/microsoft&response_type=code&client_id=d08d161d-a338-4381-bd72-a59619f1bef7";
+        }
+
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Display the authorization code if found in the URL
+                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Microsoft</h1>
+    <button onclick="loginWithMicrosoft()">Login</button>
+    <p id="authorization-code"></p>
+</body>
+</html>
