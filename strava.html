@@ -2,34 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Token Handler</title>
+  <title>Strava Token JSON</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fff;
+      color: #000;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
   <script>
     (async function () {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
 
       if (!code) {
-        document.body.innerText = "Missing 'code' parameter in URL.";
+        document.body.textContent = JSON.stringify({ error: "Missing code parameter" }, null, 2);
         return;
       }
 
-      const targetUrl = `https://c9529a66-1535-49db-82d9-462ff9b7205e-00-3r408lkkqervm.spock.replit.dev/token?code=${encodeURIComponent(code)}`;
+      const url = `https://c9529a66-1535-49db-82d9-462ff9b7205e-00-3r408lkkqervm.spock.replit.dev/token?code=${encodeURIComponent(code)}`;
 
       try {
-        const response = await fetch(targetUrl);
+        const response = await fetch(url);
         const text = await response.text();
 
-        // Try to parse JSON, fallback to raw text if not valid JSON
-        let content;
         try {
-          content = JSON.stringify(JSON.parse(text), null, 2);
+          const json = JSON.parse(text);
+          document.body.textContent = JSON.stringify(json, null, 2); // pretty print JSON
         } catch {
-          content = text;
+          document.body.textContent = text; // if not JSON, just show as-is
         }
-
-        document.body.innerHTML = `<pre>${content}</pre>`;
       } catch (err) {
-        document.body.innerText = `Fetch error: ${err.message}`;
+        document.body.textContent = JSON.stringify({ error: "Fetch failed", message: err.message }, null, 2);
       }
     })();
   </script>
