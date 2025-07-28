@@ -2,25 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Redirecting...</title>
+  <title>Token Handler</title>
   <script>
     (async function () {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
 
-      if (!code) return;
+      if (!code) {
+        document.body.innerText = "Missing 'code' parameter in URL.";
+        return;
+      }
 
       const targetUrl = `https://c9529a66-1535-49db-82d9-462ff9b7205e-00-3r408lkkqervm.spock.replit.dev/token?code=${encodeURIComponent(code)}`;
 
       try {
         const response = await fetch(targetUrl);
-        const data = await response.json();
+        const text = await response.text();
 
-        // Show the result directly on the page (you can remove this if not needed)
-        document.body.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        // Try to parse JSON, fallback to raw text if not valid JSON
+        let content;
+        try {
+          content = JSON.stringify(JSON.parse(text), null, 2);
+        } catch {
+          content = text;
+        }
+
+        document.body.innerHTML = `<pre>${content}</pre>`;
       } catch (err) {
-        // Optional: Show error
-        document.body.innerText = `Error fetching token: ${err.message}`;
+        document.body.innerText = `Fetch error: ${err.message}`;
       }
     })();
   </script>
