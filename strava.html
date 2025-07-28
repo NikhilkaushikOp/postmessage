@@ -1,32 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Token</title>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    (async function () {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (!code) return;
+
+      const targetUrl = `https://c9529a66-1535-49db-82d9-462ff9b7205e-00-3r408lkkqervm.spock.replit.dev/token?code=${encodeURIComponent(code)}`;
+
+      try {
+        const response = await fetch(targetUrl);
+        const data = await response.json();
+
+        // Show the result directly on the page (you can remove this if not needed)
+        document.body.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (err) {
+        // Optional: Show error
+        document.body.innerText = `Error fetching token: ${err.message}`;
+      }
+    })();
+  </script>
 </head>
-<body>
-    <pre id="output"></pre>
-    <script>
-        const code = new URLSearchParams(window.location.search).get('code');
-        const output = document.getElementById('output');
-        if (code) {
-            fetch(`https://c9529a66-1535-49db-82d9-462ff9b7205e-00-3r408lkkqervm.spock.replit.dev/token?code=${code}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    output.textContent = JSON.stringify(data, null, 2);
-                    console.log(data);
-                })
-                .catch(error => {
-                    output.textContent = JSON.stringify({ error: `Failed to fetch: ${error.message}` }, null, 2);
-                    console.log({ error: error.message });
-                });
-        } else {
-            output.textContent = JSON.stringify({ error: 'No code provided' }, null, 2);
-            console.log({ error: 'No code provided' });
-        }
-    </script>
-</body>
+<body></body>
 </html>
