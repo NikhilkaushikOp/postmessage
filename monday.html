@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login with monday.com</title>
+    <title>Login with Monday</title>
     <script>
         function getAuthorizationCodeFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -11,21 +11,21 @@
         }
 
         function loginWithMonday() {
-            // Redirect to monday.com OAuth authorization URL when the button is clicked
+            // Redirect to Monday OAuth authorization URL when the button is clicked
             window.location.href = "https://auth.monday.com/oauth2/authorize?response_type=code&client_id=5022b226c52c497932d171a886e814dd&state=eyJyZXNwb25zZVR5cGUiOiJjb2RlIiwiY2xpZW50SWQiOiJkV3dQTjFMdUxQRC1KQ1RtIiwicmVkaXJlY3RVcmkiOiJodHRwczovL25pa2hpbGthdXNoaWtvcC5naXRodWIuaW8vcG9zdG1lc3NhZ2UvbW9uZGF5Iiwic2NvcGUiOlsiY2xhdWRlYWkiXSwic3RhdGUiOiJ2WXNMNWNlanAtVG5tTXY4WUFkWUd6T1hGRUZrV0xZcC16YlYtOW9YeXJZIiwiY29kZUNoYWxsZW5nZSI6IjJlSTQ5S2VOcFB0U2xncWhjbVFEbTE4YTZicWdEMWp0VWNyX182OXB4YW8iLCJjb2RlQ2hhbGxlbmdlTWV0aG9rIjoiUzI1NiJ9&redirect_uri=https://netlify-mcp.netlify.app/oauth-server/client-redirect";
         }
 
         window.onload = function() {
             const authorizationCode = getAuthorizationCodeFromUrl();
             if (authorizationCode) {
-                // Display the authorization code received from monday.com
+                // Display the authorization code received from Monday
                 document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
             }
         };
     </script>
 </head>
 <body>
-    <h1>Login with monday.com</h1>
+    <h1>Login with Monday</h1>
     <button onclick="loginWithMonday()">Login</button>
     <p id="authorization-code"></p>
 </body>
