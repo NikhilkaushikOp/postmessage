@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Netlify</title>
+    <script>
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        function loginWithNetlify() {
+            // Redirect to Netlify OAuth authorization URL when the button is clicked
+            window.location.href = "https://app.netlify.com/authorize?client_id=GMS8wnRA7AfY1Cmhr3On-xvzXnGRKEHCe_dzGYln8Vw&response_type=token&state=eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6InJVbkhaSU9ycmsxS2lBVElEUHRDUnY2Rkd1VkhxWXpWMmpKR3VSaU84ZHIiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL25pa2hpbGthdXNoaWtvcC5naXRodWIuaW8vcG9zdG1lc3NhYWdlL25ldGxpZnksInN0YXRlIjoiWDVTV0hpMXZzaXJaYW5oUnlUYTdmeXlUVmtMcVFSSFVNelk3a2hFbEJXVSIsInNjb3BlIjoib3BlbmlkIG9mZmxpbmVfYWNjZXNzIHJlYWQgd3JpdGUgY2xhdWRlYWkiLCJjb2RlX2NoYWxsZW5nZSI6ImQ2UkJtZngwcVJibHNOVUtpSEFuYVBHUVdyd2xiWlRsajc3TWtDajk2ZzgiLCJjb2RlX2NoYWxsZW5nZV9tZXRob2QiOiJTMjU2In0=&redirect_uri=https://netlify-mcp.netlify.app/oauth-server/client-redirect";
+        }
+
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Display the authorization code received from Netlify
+                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Netlify</h1>
+    <button onclick="loginWithNetlify()">Login</button>
+    <p id="authorization-code"></p>
+</body>
+</html>
