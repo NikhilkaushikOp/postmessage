@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Neon</title>
+    <script>
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        function loginWithNeon() {
+            // Redirect to Neon OAuth authorization URL when the button is clicked
+            window.location.href = "https://oauth2.neon.tech/oauth2/auth?redirect_uri=https%3A%2F%2Fmcp.neon.tech%2Fcallback&token_endpoint_auth_method=client_secret_post&scope=openid+offline+offline_access+urn%3Aneoncloud%3Aprojects%3Acreate+urn%3Aneoncloud%3Aprojects%3Aread+urn%3Aneoncloud%3Aprojects%3Aupdate+urn%3Aneoncloud%3Aprojects%3Adelete+urn%3Aneoncloud%3Aorgs%3Acreate+urn%3Aneoncloud%3Aorgs%3Aread+urn%3Aneoncloud%3Aorgs%3Aupdate+urn%3Aneoncloud%3Aorgs%3Adelete+urn%3Aneoncloud%3Aorgs%3Apermission&response_type=code&state=eyJyZXNwb25zZVR5cGUiOiJjb2RlIiwiY2xpZW50SWQiOiJJbU00MDBFNiIsInJlZGlyZWN0VXJpIjoiaHR0cHM6Ly9uaWtoaWxrYXVzaGlrb3AuZ2l0aHViLmlvL3Bvc3RtZXNzYWdlL25lb24iLCJzY29wZSI6WyJjbGF1ZGVhaSJdLCJzdGF0ZSI6IkJLZWhubzBYOHkxQlJVbjBKb2ZYeWJKLVZoXzBKeWJPQ3BvWE5qU3E4T0EiLCJjb2RlQ2hhbGxlbmdlIjoiRmk0TUVYejNYVUFfdkpBTUhsWms4MXVoRkpqRzQyUTRMeHNHb1JqVVY4ZyIsImNvZGVDaGFsbGVuZ2VNZXRob2QiOiJTMjU2In0=&client_id=neon-mcp-server";
+        }
+
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Display the authorization code received from Neon
+                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Neon</h1>
+    <button onclick="loginWithNeon()">Login</button>
+    <p id="authorization-code"></p>
+</body>
+</html>
