@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Wix</title>
+    <script>
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        function loginWithWix() {
+            // Redirect to Wix OAuth authorization URL when the button is clicked
+            window.location.href = "https://mcp.wix.com/authorize?response_type=code&client_id=rOBymfEghIDYHIPy&redirect_uri=https://nikhilkaushikop.github.io/postmessage/wix&state=dzBCDjES-Q9jw4KoZJVxItQcGqHqDQWxjrC_zPNsba4&scope=claudeai";
+        }
+
+        async function getAccessToken(authorizationCode) {
+            const response = await fetch('https://mcp.wix.com/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                body: new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    code: authorizationCode,
+                    redirect_uri: 'https://nikhilkaushikop.github.io/postmessage/wix',
+                    client_id: 'rOBymfEghIDYHIPy',
+                    client_secret: 'sYlAnYWVwL8KeL2LftEg5SSotUx7eB4v'
+                })
+            });
+
+            const data = await response.json();
+            if (data.access_token) {
+                // Display the access token received from Wix
+                document.getElementById("access-token").textContent = "Access Token: " + data.access_token;
+            }
+        }
+
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Call the function to get access token with the authorization code
+                getAccessToken(authorizationCode);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Wix</h1>
+    <button onclick="loginWithWix()">Login</button>
+    <p id="authorization-code"></p>
+    <p id="access-token"></p>
+</body>
+</html>
