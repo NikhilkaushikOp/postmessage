@@ -1,0 +1,32 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with Buildkite</title>
+    <script>
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        function loginWithBuildkite() {
+            // Redirect to Buildkite OAuth authorization URL when the button is clicked
+            window.location.href = "https://buildkite.com/oauth/authorize?access_type=offline&client_id=62c86a53e3553ba88920&redirect_uri=https%3A%2F%2Fnikhilkaushikop.github.io%2Fbuildkite&response_type=code&scope=read_artifacts+read_build_logs+read_builds+read_clusters+read_organizations+read_pipelines+read_suites+read_user+write_builds+write_pipelines&state=vtfuRFyNUZ8WsVZueyszIoEFAWhLEQZhMqNdW2r_pSE%3D";
+        }
+
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Display the authorization code received from Buildkite
+                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Login with Buildkite</h1>
+    <button onclick="loginWithBuildkite()">Login</button>
+    <p id="authorization-code"></p>
+</body>
+</html>
