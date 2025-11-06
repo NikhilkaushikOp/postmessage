@@ -17,12 +17,10 @@
     <button onclick="sendTokenRequest(true)">Use This Code</button>
   </div>
 
-  <div id="token-display" style="margin-top: 16px; padding: 10px; border: 1px solid #ccc; display: none;">
+  <div id="token-display" style="margin-top: 16px; display: none;">
     <div><strong>Access Token:</strong></div>
-    <textarea id="access-token" readonly rows="4" cols="90"></textarea>
+    <div id="access-token" style="font-family: monospace; white-space: pre-wrap; word-break: break-all;"></div>
   </div>
-
-  <pre id="debug" style="margin-top:12px; background:#f7f7f7; padding:8px; border:1px dashed #ccc; display:none;"></pre>
 
   <script>
     // OAuth token exchange constants
@@ -55,22 +53,13 @@
     async function sendTokenRequest(preferManual) {
       const manualEl = document.getElementById('manual-code');
       const manual = manualEl ? (manualEl.value || '').trim() : '';
-      const { code: fromUrl, source } = detectedCode();
+      const { code: fromUrl } = detectedCode();
       const code = preferManual ? (manual || fromUrl) : (fromUrl || manual);
 
       if (!code) {
         alert('No code found in URL or manual input. Please provide a code.');
         return;
       }
-
-      const debugEl = document.getElementById('debug');
-      debugEl.style.display = 'block';
-      debugEl.textContent =
-        'href: ' + window.location.href + '\n' +
-        'search: ' + window.location.search + '\n' +
-        'hash: ' + window.location.hash + '\n' +
-        'detected source: ' + source + '\n' +
-        'using code length: ' + code.length;
 
       const btn = document.getElementById('send-btn');
       btn.disabled = true;
@@ -98,7 +87,7 @@
 
         const data = await resp.json();
         const token = data.access_token || 'No access_token in response';
-        document.getElementById('access-token').value = token;
+        document.getElementById('access-token').textContent = token;
         document.getElementById('token-display').style.display = 'block';
       } catch (e) {
         alert('Error during token exchange: ' + e.message);
