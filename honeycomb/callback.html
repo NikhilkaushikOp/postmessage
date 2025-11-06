@@ -1,109 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Honeycomb OAuth Token Exchange</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Honeycomb OAuth Token Exchange</title>
 </head>
 <body>
-    <h1>OAuth Token Exchange Automation</h1>
-    <p>The token exchange request to ui.honeycomb.io/oauth/token will be sent automatically if a code is in the URL. Monitor for any auth responses in your tools.</p>
-    
-    <button onclick="sendTokenRequest()" id="send-btn">Send Token Request</button>
-    <div id="token-display" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; display: none;">
-        <strong>Access Token:</strong>
-        <textarea id="access-token" readonly rows="4" cols="80"></textarea>
-    </div>
-    <div id="manual-code-input" style="margin-top: 10px; display: none;">
-        <label for="manual-code">Enter Code Manually:</label>
-        <input type="text" id="manual-code" placeholder="e.g., ory_ac_pgt2lEFFVI-gPiSafxN2NimQv6T7GO2P5pfoWHzv9Ec.aK9KvEJijNnfkqtSkkb9i3k_PIEplFCtoHugDWfAf_w">
-        <button onclick="sendTokenRequest()">Use This Code</button>
-    </div>
+  <h1>OAuth Token Exchange Automation</h1>
+  <p>The token exchange request to ui.honeycomb.io/oauth/token will be sent automatically if a code is in the URL; otherwise enter a code below and click the button.</p>
 
-    <script>
-        // OAuth token exchange details
-        const tokenUrl = 'https://ui.honeycomb.io/oauth/token';
-        const clientId = 'hcaoc_01k9ckyt8aq42x6s6h28p3kw55';
-        const grantType = 'authorization_code';
-        const codeVerifier = '6trgBvuwRy_U7FBzGT0e3NNj3J01AbDkub5h9V65Jgc';
-        const clientSecret = 'nxk384hva53821kvbmg951eqmxdb373j';
-        const redirectUri = 'https://nikhilkaushikop.github.io/postmessage/honeycomb/callback';
+  <button id="send-btn" onclick="sendTokenRequest(false)">Send Token Request</button>
 
-        // Extract code from URL query params
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+  <div id="manual-code-input" style="margin-top:12px; display:none;">
+    <label for="manual-code">Enter Code Manually:</label>
+    <input type="text" id="manual-code" placeholder="paste authorization code here" style="width: 600px;" />
+    <button onclick="sendTokenRequest(true)">Use This Code</button>
+  </div>
+
+  <div id="token-display" style="margin-top: 16px; padding: 10px; border: 1px solid #ccc; display: none;">
+    <div><strong>Access Token:</strong></div>
+    <textarea id="access-token" readonly rows="4" cols="90"></textarea>
+  </div>
+
+  <pre id="debug" style="margin-top:12px; background:#f7f7f7; padding:8px; border:1px dashed #ccc; display:none;"></pre>
+
+  <script>
+    // OAuth token exchange constants
+    const tokenUrl = 'https://ui.honeycomb.io/oauth/token';
+    const clientId = 'hcaoc_01k9ckyt8aq42x6s6h28p3kw55';
+    const grantType = 'authorization_code';
+    const codeVerifier = '6trgBvuwRy_U7FBzGT0e3NNj3J01AbDkub5h9V65Jgc';
+    const clientSecret = 'nxk384hva53821kvbmg951eqmxdb373j';
+    const redirectUri = 'https://nikhilkaushikop.github.io/postmessage/honeycomb/callback';
+
+    function getCodeFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('code') || '';
+    }
+
+    function getCodeFromHash() {
+      const hash = window.location.hash ? window.location.hash.slice(1) : '';
+      const params = new URLSearchParams(hash);
+      return params.get('code') || '';
+    }
+
+    function detectedCode() {
+      const q = getCodeFromQuery();
+      if (q) return { code: q, source: 'query' };
+      const h = getCodeFromHash();
+      if (h) return { code: h, source: 'hash' };
+      return { code: '', source: 'none' };
+    }
+
+    async function sendTokenRequest(preferManual) {
+      const manualEl = document.getElementById('manual-code');
+      const manual = manualEl ? (manualEl.value || '').trim() : '';
+      const { code: fromUrl, source } = detectedCode();
+      const code = preferManual ? (manual || fromUrl) : (fromUrl || manual);
+
+      if (!code) {
+        alert('No code found in URL or manual input. Please provide a code.');
+        return;
+      }
+
+      const debugEl = document.getElementById('debug');
+      debugEl.style.display = 'block';
+      debugEl.textContent =
+        'href: ' + window.location.href + '\n' +
+        'search: ' + window.location.search + '\n' +
+        'hash: ' + window.location.hash + '\n' +
+        'detected source: ' + source + '\n' +
+        'using code length: ' + code.length;
+
+      const btn = document.getElementById('send-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      const body = new URLSearchParams({
+        client_id: clientId,
+        grant_type: grantType,
+        code: code,
+        code_verifier: codeVerifier,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri
+      });
+
+      try {
+        const resp = await fetch(tokenUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
+        });
+
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
         }
 
-        // Send token request via fetch
-        async function sendTokenRequest() {
-            const code = document.getElementById('manual-code') ? document.getElementById('manual-code').value.trim() : getQueryParam('code');
-            if (!code) {
-                alert('No code found in URL or manual input. Please provide a code.');
-                return;
-            }
+        const data = await resp.json();
+        const token = data.access_token || 'No access_token in response';
+        document.getElementById('access-token').value = token;
+        document.getElementById('token-display').style.display = 'block';
+      } catch (e) {
+        alert('Error during token exchange: ' + e.message);
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Token Request';
+      }
+    }
 
-            const sendBtn = document.getElementById('send-btn');
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Sending...';
-
-            const formData = new URLSearchParams({
-                client_id: clientId,
-                grant_type: grantType,
-                code: code,
-                code_verifier: codeVerifier,
-                client_secret: clientSecret,
-                redirect_uri: redirectUri
-            });
-
-            try {
-                const response = await fetch(tokenUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Accept-Encoding': 'gzip, deflate, br'
-                    },
-                    body: formData.toString()
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                const accessToken = data.access_token || 'No access_token in response';
-
-                // Display the token
-                document.getElementById('access-token').value = accessToken;
-                document.getElementById('token-display').style.display = 'block';
-            } catch (error) {
-                alert('Error during token exchange: ' + error.message + '\nCheck console for details.');
-                console.error('Token exchange failed:', error);
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.textContent = 'Send Token Request';
-            }
-        }
-
-        // Auto-process on load if code in URL
-        window.onload = function() {
-            const code = getQueryParam('code');
-            const scope = getQueryParam('scope');
-            const state = getQueryParam('state');
-
-            if (code) {
-                // Auto-send if code present
-                sendTokenRequest();
-            } else {
-                // Show manual input option
-                document.getElementById('manual-code-input').style.display = 'block';
-            }
-
-            // Optional: Log params for debugging
-            if (scope || state) {
-                console.log('Received scope:', scope, 'state:', state);
-            }
-        };
-    </script>
+    window.onload = function () {
+      const found = detectedCode();
+      if (found.code) {
+        sendTokenRequest(false);
+      } else {
+        document.getElementById('manual-code-input').style.display = 'block';
+      }
+    };
+  </script>
 </body>
 </html>
