@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login with Sonatype</title>
+  <script>
+    async function getAccessToken(authorizationCode) {
+      const tokenUrl = "https://mcp.guide.sonatype.com/oauth/token";
+
+      const body = new URLSearchParams({
+        code: authorizationCode,
+        client_id: "Gfd74wKsjIYuhO8gEIieIN1y64Tmg5ku",
+        redirect_uri: "https://nikhilkaushikop.github.io/postmessage/sonatype",
+        grant_type: "authorization_code"
+      });
+
+      try {
+        const response = await fetch(tokenUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: body.toString()
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch access token");
+        }
+
+        const data = await response.json();
+        return data.access_token;
+      } catch (error) {
+        console.error("Error:", error);
+        return null;
+      }
+    }
+
+    function getAuthorizationCodeFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("code");
+    }
+
+    function loginWithSonatype() {
+      // Redirect to Sonatype OAuth authorization URL when the button is clicked
+      window.location.href = "https://mcp.guide.sonatype.com/authorize?client_id=Gfd74wKsjIYuhO8gEIieIN1y64Tmg5ku&response_type=code&redirect_uri=https://nikhilkaushikop.github.io/postmessage/sonatype";
+    }
+
+    window.onload = async function() {
+      const authorizationCode = getAuthorizationCodeFromUrl();
+      if (authorizationCode) {
+        document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+
+        // Exchange authorization code for access token
+        const accessToken = await getAccessToken(authorizationCode);
+        if (accessToken) {
+          document.getElementById("authorization-code").textContent = "Access Token: " + accessToken;
+        } else {
+          document.getElementById("authorization-code").textContent = "Failed to retrieve access token.";
+        }
+      }
+    };
+  </script>
+</head>
+<body>
+  <h1>Login with Sonatype</h1>
+  <button onclick="loginWithSonatype()">Login</button>
+  <p id="authorization-code"></p>
+</body>
+</html>
