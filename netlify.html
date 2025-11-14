@@ -4,65 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login with Netlify</title>
-   <script>
-function getUserInfo(accessToken) {
-    const headers = {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        "Accept": "text/event-stream",
-    };
+    <script>
+        // Function to extract the authorization code from the URL
+        function getAuthorizationCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
 
-    const body = {
-        jsonrpc: "2.0",
-        id: 3,
-        method: "tools/call",
-        params: {
-            name: "netlify-user-services-reader",
-            arguments: {
-                selectSchema: {
-                    operation: "get-user",
-                    params: {},
+        // Function to handle the login redirection to Netlify OAuth
+        function loginWithNetlify() {
+            // Redirect to Netlify OAuth authorization URL
+            window.location.href = "https://app.netlify.com/authorize?client_id=GMS8wnRA7AfY1Cmhr3On-xvzXnGRKEHCe_dzGYln8Vw&response_type=token&state=eyJyZXNwb25zZV90eXBlIjoiY29kZSIsImNsaWVudF9pZCI6InJVbkhaSU9ycmsxS2lBVElEUHRDUnY2Rkd1VkhxWXpWMmpKR3VSaU84ZHIiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL25pa2hpbGthdXNoaWtvcC5naXRodWIuaW8vcG9zdG1lc3NhYWdlL25ldGxpZnksInN0YXRlIjoiWDVTV0hpMXZzaXJaYW5oUnlUYTdmeXlUVmtMcVFSSFVNelk3a2hFbEJXVSIsInNjb3BlIjoib3BlbmlkIG9mZmxpbmVfYWNjZXNzIHJlYWQgd3JpdGUgY2xhdWRlYWkiLCJjb2RlX2NoYWxsZW5nZSI6ImQ2UkJtZngwcVJibHNOVUtpSEFuYVBHUVdyd2xiWlRsajc3TWtDajk2ZzgiLCJjb2RlX2NoYWxsZW5nZV9tZXRob2QiOiJTMjU2In0=&redirect_uri=https://netlify-mcp.netlify.app/oauth-server/client-redirect";
+        }
+
+        // Function to exchange authorization code for access token
+        function getAccessToken(authorizationCode) {
+            const data = new URLSearchParams();
+            data.append("grant_type", "authorization_code");
+            data.append("code", authorizationCode);
+            data.append("redirect_uri", "https://claude.ai/api/mcp/auth_callback");
+            data.append("client_id", "GMS8wnRA7AfY1Cmhr3On-xvzXnGRKEHCe_dzGYln8Vw");
+
+            // Send POST request to get the access token
+            fetch("https://netlify-mcp.netlify.app/oauth-server/token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json",
                 },
-            },
-        },
-    };
-
-    fetch("https://netlify-mcp.netlify.app/mcp", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-    })
-    .then(res => res.text())   // <-- IMPORTANT: read as raw text
-    .then(raw => {
-        // Extract only the JSON part after "data: "
-        const match = raw.match(/data:\s*(.*)/);
-        if (!match) {
-            document.getElementById("user-info").textContent = "Error: Unable to extract JSON from SSE.";
-            return;
+                body: data.toString(),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.access_token) {
+                    // Successfully received access token
+                    document.getElementById("authorization-code").textContent = "Access Token: " + data.access_token;
+                    // Now fetch user info using the access token
+                    getUserInfo(data.access_token);
+                } else {
+                    document.getElementById("authorization-code").textContent = "Error: " + data.error_description;
+                }
+            })
+            .catch(error => {
+                document.getElementById("authorization-code").textContent = "Error: " + error;
+            });
         }
 
-        let jsonText = match[1];
+        // Function to fetch user information using the access token
+        function getUserInfo(accessToken) {
+            const headers = {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+                "Accept": "application/json, text/event-stream",
+            };
 
-        // Remove outer quotes if present (because it's a JSON string inside a JSON string)
-        if (jsonText.startsWith('"') && jsonText.endsWith('"')) {
-            jsonText = jsonText.slice(1, -1);
+            const body = {
+                jsonrpc: "2.0",
+                id: 3,
+                method: "tools/call",
+                params: {
+                    name: "netlify-user-services-reader",
+                    arguments: {
+                        selectSchema: {
+                            operation: "get-user",
+                            params: {},
+                        },
+                    },
+                },
+            };
+
+            fetch("https://netlify-mcp.netlify.app/mcp", {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(body),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result && data.result.content) {
+                    // Parse the raw JSON from the 'text' field (removing escape characters)
+                    const userDataString = data.result.content[0].text;
+                    const userData = JSON.parse(userDataString.replace(/\\"/g, '"')); // Remove escape characters
+
+                    // Display user information as raw JSON (no beautifying)
+                    document.getElementById("user-info").textContent = JSON.stringify(userData);
+                } else {
+                    document.getElementById("user-info").textContent = "Error: Could not fetch user data.";
+                }
+            })
+            .catch(error => {
+                document.getElementById("user-info").textContent = "Error: " + error;
+            });
         }
 
-        // Remove escape characters
-        jsonText = jsonText.replace(/\\"/g, '"');
-
-        // Now parse into an object
-        const parsed = JSON.parse(jsonText);
-
-        // Display clean JSON (not beautified)
-        document.getElementById("user-info").textContent = JSON.stringify(parsed);
-
-    })
-    .catch(error => {
-        document.getElementById("user-info").textContent = "Error: " + error;
-    });
-}
-</script>
+        window.onload = function() {
+            const authorizationCode = getAuthorizationCodeFromUrl();
+            if (authorizationCode) {
+                // Display the authorization code received from Netlify
+                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+                // Exchange the authorization code for access token
+                getAccessToken(authorizationCode);
+            }
+        };
+    </script>
 </head>
 <body>
     <h1>Login with Netlify</h1>
