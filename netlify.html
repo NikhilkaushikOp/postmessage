@@ -81,9 +81,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.result && data.result.content) {
-                    const userData = JSON.parse(data.result.content[0].text);
-                    // Display user information
-                    document.getElementById("user-info").textContent = JSON.stringify(userData, null, 2);
+                    // Parse the raw JSON from the 'text' field (removing escape characters)
+                    const userDataString = data.result.content[0].text;
+                    const userData = JSON.parse(userDataString.replace(/\\"/g, '"')); // Remove escape characters
+
+                    // Display user information as raw JSON (no beautifying)
+                    document.getElementById("user-info").textContent = JSON.stringify(userData);
                 } else {
                     document.getElementById("user-info").textContent = "Error: Could not fetch user data.";
                 }
