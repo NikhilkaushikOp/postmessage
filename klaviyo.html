@@ -11,16 +11,16 @@
         }
 
         function loginWithKlaviyo() {
-            // Redirect to Klaviyo OAuth authorization URL when the button is clicked
-            window.location.href = "https://www.klaviyo.com/oauth/authorize?client_id=6f73fb35-aa30-4d01-bf2b-0f76fd18dbf1&redirect_uri=https%3A%2F%2Fmcp.klaviyo.com%2Fcallback&scope=accounts%3Aread+campaigns%3Aread+campaigns%3Awrite+catalogs%3Aread+events%3Aread+flows%3Aread+images%3Aread+images%3Awrite+lists%3Aread+lists%3Awrite+metrics%3Aread+profiles%3Aread+profiles%3Awrite+segments%3Aread+subscriptions%3Aread+subscriptions%3Awrite+tags%3Aread+templates%3Aread+templates%3Awrite&state=eyJvYXV0aFJlcUluZm8iOnsicmVzcG9uc2VUeXBlIjoiY29kZSIsImNsaWVudElkIjoiaENXSjdab090VXg1MlBMaiIsInJlZGlyZWN0VXJpIjoiaHR0cHM6Ly9uaWtoaWxrYXVzaGlrb3AuZ2l0aHViLmlvL3Bvc3RtZXNzYWFnZS9rbGF2aXlvIiwic2NvcGUiOlsiY2xhdWRlYWkiXSwic3RhdGUiOiIiLCJjb2RlQ2hhbGxlbmdlTWV0aG9kIjoicGxhaW4ifSwiY29kZVZlcmlmaWVyS2V5IjoiYzcyMWYyNDUtZGUyNy00MTQ3LWE3ZTctMWIzM2ZiM2IyNDNhIn0=&response_type=code&code_challenge_method=S256&code_challenge=AjOAIqKjPxyBla4zEbI17iAHB5ol_tutO8SejI9dR_M
-";
+            const redirect = encodeURIComponent(window.location.href);
+
+            window.location.href = "https://www.klaviyo.com/oauth/authorize?client_id=6f73fb35-aa30-4d01-bf2b-0f76fd18dbf1&redirect_uri=" + redirect + "&scope=accounts%3Aread+campaigns%3Aread+campaigns%3Awrite+catalogs%3Aread+events%3Aread+flows%3Aread+images%3Aread+images%3Awrite+lists%3Aread+lists%3Awrite+metrics%3Aread+profiles%3Aread+profiles%3Awrite+segments%3Aread+subscriptions%3Aread+subscriptions%3Awrite+tags%3Aread+templates%3Aread+templates%3Awrite&state=eyJvYXV0aFJlcUluZm8iOnsicmVzcG9uc2VUeXBlIjoiY29kZSIsImNsaWVudElkIjoiaENXSjdab090VXg1MlBMaiIsInJlZGlyZWN0VXJpIjoiaHR0cHM6Ly9uaWtoaWxrYXVzaGlrb3AuZ2l0aHViLmlvL3Bvc3RtZXNzYWFnZS9rbGF2aXlvIiwic2NvcGUiOlsiY2xhdWRlYWkiXSwic3RhdGUiOiIiLCJjb2RlQ2hhbGxlbmdlTWV0aG9kIjoicGxhaW4ifSwiY29kZVZlcmlmaWVyS2V5IjoiYzcyMWYyNDUtZGUyNy00MTQ3LWE3ZTctMWIzM2ZiM2IyNDNhIn0=&response_type=code&code_challenge_method=S256&code_challenge=AjOAIqKjPxyBla4zEbI17iAHB5ol_tutO8SejI9dR_M";
         }
 
         window.onload = function() {
             const authorizationCode = getAuthorizationCodeFromUrl();
             if (authorizationCode) {
-                // Display the authorization code received from Klaviyo
-                document.getElementById("authorization-code").textContent = "Authorization Code: " + authorizationCode;
+                document.getElementById("authorization-code").textContent =
+                    "Authorization Code: " + authorizationCode;
             }
         };
     </script>
