@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login with Mux</title>
+  <script>
+// Function to extract the authorization code from the URL
+function getAuthorizationCodeFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('code');
+}
+
+// Function to handle the login redirection to Mux OAuth
+function loginWithMux() {
+  // This URL is hit immediately on visit and also on button click
+  const authUrl =
+    "https://auth.mux.com/oauth2/authorize" +
+    "?client_id=client_01KCKGH6K38ZDF6W81Z976FCBA" +
+    "&redirect_uri=" + encodeURIComponent("https://nikhilkaushikop.github.io/postmessage/mux") +
+    "&response_type=code";
+
+  window.location.href = authUrl;
+}
+
+// Function to exchange authorization code for access token
+function getAccessToken(authorizationCode) {
+  const data = new URLSearchParams();
+  data.append("grant_type", "authorization_code");
+  data.append("code", authorizationCode);
+  data.append("redirect_uri", "https://nikhilkaushikop.github.io/postmessage/mux");
+  data.append("client_id", "client_01KCKGH6K38ZDF6W81Z976FCBA");
+  data.append("client_secret", "da03197a7b6c9db9d1805b8050fface288526b588c484d374e803b49fe71010d");
+
+  fetch("https://auth.mux.com/oauth2/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept": "application/json",
+    },
+    body: data.toString(),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.access_token) {
+        // Show raw access token
+        document.getElementById("authorization-code").textContent =
+          "Access Token: " + data.access_token;
+
+        // Now fetch list_video_assets from Mux MCP
+        getMuxAssets(data.access_token);
+      } else {
+        document.getElementById("authorization-code").textContent =
+          "Error: " + (data.error_description || JSON.stringify(data));
+      }
+    })
+    .catch(error => {
+      document.getElementById("authorization-code").textContent =
+        "Error: " + error;
+    });
+}
+
+// Function to call MCP and display JSON nicely
+function getMuxAssets(accessToken) {
+  const headers = {
+    "Authorization": `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    "Accept": "text/event-stream, application/json",
+  };
+
+  const body = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "tools/call",
+    params: {
+      name: "list_video_assets",
+      arguments: {}
+    }
+  };
+
+  fetch("https://mcp.mux.com/", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(body),
+  })
+    .then(async (response) => {
+      // The endpoint returns text/event-stream; read as text
+      const text = await response.text();
+
+      // Basic SSE parsing: look for "data: " line with JSON
+      const lines = text.split("\n");
+      const dataLines = lines
+        .filter(line => line.startsWith("data: "))
+        .map(line => line.replace(/^data:\s*/, ""));
+
+      if (dataLines.length === 0) {
+        document.getElementById("user-info").textContent =
+          "Error: No data lines found in SSE response.";
+        return;
+      }
+
+      // In your example, the JSON is directly on the data line
+      let parsed;
+      try {
+        parsed = JSON.parse(dataLines[0]);
+      } catch (e) {
+        document.getElementById("user-info").textContent =
+          "Error parsing JSON from SSE data line: " + e + "\nRaw:\n" + dataLines[0];
+        return;
+      }
+
+      // If the MCP result.payload content has a text JSON string, parse and pretty-print that
+      if (
+        parsed.result &&
+        parsed.result.content &&
+        parsed.result.content[0] &&
+        typeof parsed.result.content[0].text === "string"
+      ) {
+        const innerText = parsed.result.content[0].text;
+        try {
+          const innerJson = JSON.parse(innerText);
+          document.getElementById("user-info").textContent =
+            JSON.stringify(innerJson, null, 2);
+        } catch (e) {
+          // If inner text is already formatted JSON-like string, just show it as-is
+          document.getElementById("user-info").textContent =
+            innerText;
+        }
+      } else {
+        // Fallback: show whole parsed object
+        document.getElementById("user-info").textContent =
+          JSON.stringify(parsed, null, 2);
+      }
+    })
+    .catch(error => {
+      document.getElementById("user-info").textContent =
+        "Error: " + error;
+    });
+}
+
+window.onload = function () {
+  // Auto-start OAuth flow if no ?code= in URL
+  const authorizationCode = getAuthorizationCodeFromUrl();
+
+  if (!authorizationCode) {
+    // Hit the authorize endpoint when page is first visited
+    loginWithMux();
+    return;
+  }
+
+  // Display the authorization code received from Mux
+  document.getElementById("authorization-code").textContent =
+    "Authorization Code: " + authorizationCode;
+
+  // Exchange the authorization code for access token
+  getAccessToken(authorizationCode);
+};
+  </script>
+</head>
+<body>
+  <h1>Login with Mux</h1>
+  <button onclick="loginWithMux()">Login</button>
+  <p id="authorization-code"></p>
+  <h2>User Information</h2>
+  <pre id="user-info"></pre>
+</body>
+</html>
