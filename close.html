@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login with Close</title>
+</head>
+<body>
+  <h1>Login with Close</h1>
+  <button onclick="loginWithClose()">Login</button>
+
+  <p id="status"></p>
+  <h2>Leads</h2>
+  <pre id="output"></pre>
+
+<script>
+const CLIENT_ID = "oa2client_4dT3wSbkIPZXhqlCptWNjg";
+const CLIENT_SECRET = "ZZDiFnb2It6LP5p1VsQ3IK7HL1KYrrI7VqrF2yqQqTod6ep4";
+const REDIRECT_URI = "https://close-oyjq.onrender.com/";
+
+function getAuthorizationCodeFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("code");
+}
+
+function loginWithClose() {
+  const authUrl =
+    "https://app.close.com/authorize/" +
+    "?client_id=" + CLIENT_ID +
+    "&response_type=code" +
+    "&redirect_uri=" + encodeURIComponent(REDIRECT_URI);
+
+  window.location.href = authUrl;
+}
+
+async function exchangeCodeForToken(code) {
+  const params = new URLSearchParams();
+  params.append("grant_type", "authorization_code");
+  params.append("code", code);
+  params.append("redirect_uri", REDIRECT_URI);
+  params.append("client_id", CLIENT_ID);
+  params.append("client_secret", CLIENT_SECRET);
+
+  const res = await fetch("https://api.close.com/oauth2/token/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept": "application/json"
+    },
+    body: params.toString()
+  });
+
+  const text = await res.text();
+  return JSON.parse(text);
+}
+
+async function listLeads(accessToken) {
+  const res = await fetch("https://mcp.close.com/mcp", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: {
+        name: "lead_search",
+        arguments: {
+          name: null,
+          full_text: null,
+          lead_status_id: null,
+          smart_view_id: null
+        }
+      }
+    })
+  });
+
+  return res.json();
+}
+
+window.onload = async () => {
+  const code = getAuthorizationCodeFromUrl();
+
+  if (!code) {
+    document.getElementById("status").textContent = "Not logged in";
+    return;
+  }
+
+  document.getElementById("status").textContent = "Exchanging authorization code...";
+
+  try {
+    const token = await exchangeCodeForToken(code);
+
+    if (!token.access_token) {
+      throw new Error("No access token returned");
+    }
+
+    document.getElementById("status").textContent = "Fetching leads...";
+
+    const leadsResponse = await listLeads(token.access_token);
+
+    const leads =
+      leadsResponse?.result?.structuredContent?.results?.results || [];
+
+    document.getElementById("status").textContent =
+      `Found ${leads.length} leads`;
+
+    document.getElementById("output").textContent =
+      JSON.stringify(leads, null, 2);
+
+  } catch (err) {
+    document.getElementById("status").textContent = "Error";
+    document.getElementById("output").textContent = err.message;
+  }
+};
+</script>
+</body>
+</html>
