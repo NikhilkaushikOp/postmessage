@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login with Close</title>
+  <title>Close OAuth – List Leads</title>
 </head>
 <body>
   <h1>Login with Close</h1>
@@ -14,36 +14,41 @@
   <pre id="output"></pre>
 
 <script>
-const CLIENT_ID = "oa2client_4dT3wSbkIPZXhqlCptWNjg";
-const CLIENT_SECRET = "ZZDiFnb2It6LP5p1VsQ3IK7HL1KYrrI7VqrF2yqQqTod6ep4";
-const REDIRECT_URI = "https://close-oyjq.onrender.com/";
+/* ===== OAuth Config (UPDATED) ===== */
+const CLIENT_ID = "oa2client_05l456hvztxgTL6Nr6CIHc";
+const CLIENT_SECRET = "qwwb7kSUdjYw3QUQZfo2E0ZWJENr65SUdkNXWIxQZ1HEA3no";
+const REDIRECT_URI = "https://nikhilkaushikop.github.io/close";
+const SCOPE = "mcp.read mcp.write_destructive mcp.write_safe offline_access";
 
+/* ===== Helpers ===== */
 function getAuthorizationCodeFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("code");
 }
 
+/* ===== Step 1: Redirect to Close ===== */
 function loginWithClose() {
   const authUrl =
     "https://app.close.com/authorize/" +
     "?client_id=" + CLIENT_ID +
     "&response_type=code" +
+    "&scope=" + encodeURIComponent(SCOPE) +
     "&redirect_uri=" + encodeURIComponent(REDIRECT_URI);
 
   window.location.href = authUrl;
 }
 
+/* ===== Step 2: Exchange Code for Token ===== */
 async function exchangeCodeForToken(code) {
   const params = new URLSearchParams();
   params.append("grant_type", "authorization_code");
   params.append("code", code);
   params.append("redirect_uri", REDIRECT_URI);
-  params.append("client_id", CLIENT_ID);
-  params.append("client_secret", CLIENT_SECRET);
 
   const res = await fetch("https://api.close.com/oauth2/token/", {
     method: "POST",
     headers: {
+      "Authorization": "Basic " + btoa(CLIENT_ID + ":" + CLIENT_SECRET),
       "Content-Type": "application/x-www-form-urlencoded",
       "Accept": "application/json"
     },
@@ -54,6 +59,7 @@ async function exchangeCodeForToken(code) {
   return JSON.parse(text);
 }
 
+/* ===== Step 3: List Leads (MCP) ===== */
 async function listLeads(accessToken) {
   const res = await fetch("https://mcp.close.com/mcp", {
     method: "POST",
@@ -81,6 +87,7 @@ async function listLeads(accessToken) {
   return res.json();
 }
 
+/* ===== App Boot ===== */
 window.onload = async () => {
   const code = getAuthorizationCodeFromUrl();
 
@@ -89,7 +96,8 @@ window.onload = async () => {
     return;
   }
 
-  document.getElementById("status").textContent = "Exchanging authorization code...";
+  document.getElementById("status").textContent =
+    "Authorization code received. Exchanging for token...";
 
   try {
     const token = await exchangeCodeForToken(code);
